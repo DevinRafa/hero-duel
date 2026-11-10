@@ -1,0 +1,60 @@
+@startuml
+skinparam dpi 220
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam roundCorner 4
+skinparam ArrowColor #333333
+skinparam ClassBackgroundColor #F2F2F2
+skinparam ClassBorderColor #262626
+skinparam ClassHeaderBackgroundColor #262626
+skinparam ClassFontColor #000000
+skinparam stereotypeCBackgroundColor #FFFFFF
+hide circle
+
+abstract class Karakter <<abstract>> {
+  nama
+  hp
+  hpMaks
+  kekuatan
+  --
+  serang()
+  terimaDamage()
+  pulihkanHp()
+  masihHidup()
+}
+
+class Ksatria {
+  serang()
+}
+
+class Penyihir {
+  serang()
+  sembuhkan()
+}
+
+class Monster {
+  serang()
+}
+
+class BisaMenyembuhkan <<interface>> {
+  sembuhkan()
+}
+
+class Pertarungan {
+  giliran
+  riwayat
+  pemenang
+  --
+  pahlawanMenyerang()
+  pahlawanMenyembuhkan()
+  isSelesai()
+}
+
+Karakter <|-- Ksatria
+Karakter <|-- Penyihir
+Karakter <|-- Monster
+BisaMenyembuhkan <|.. Penyihir
+Pertarungan "1" o-- "2" Karakter : melibatkan >
+@enduml

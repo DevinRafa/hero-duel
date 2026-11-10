@@ -1,0 +1,52 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam roundCorner 4
+skinparam ArrowColor #333333
+skinparam ClassBackgroundColor #F2F2F2
+skinparam ClassBorderColor #262626
+skinparam stereotypeCBackgroundColor #FFFFFF
+hide circle
+hide empty members
+left to right direction
+
+class JFrame <<javax.swing>>
+
+class JendelaUtama <<duelpahlawan.ui>> {
+  -pertarungan : Pertarungan
+  -klikSerang() : void
+  -klikSembuhkan() : void
+  -perbaruiTampilan() : void
+}
+
+class Pertarungan <<duelpahlawan.model>> {
+  -pahlawan : Karakter
+  -lawan : Karakter
+  -riwayat : List<String>
+  -giliran : int
+  -pemenang : Karakter
+  +Pertarungan(pahlawan : Karakter, lawan : Karakter)
+  +pahlawanMenyerang() : void
+  +pahlawanMenyembuhkan() : void
+  +pahlawanBisaMenyembuhkan() : boolean
+  -akhiriGiliran() : void
+  -periksaPemenang() : void
+  -pastikanBerlangsung() : void
+  -catat(pesan : String) : void
+  +isSelesai() : boolean
+  +getPemenang() : Karakter
+  +getPahlawan() : Karakter
+  +getLawan() : Karakter
+  +getGiliran() : int
+  +getRiwayat() : List<String>
+}
+
+abstract class Karakter <<abstract>>
+
+JFrame <|-- JendelaUtama
+JendelaUtama --> "1" Pertarungan : mengelola >
+Pertarungan "1" o-- "2" Karakter : melibatkan >
+@enduml

@@ -1,0 +1,66 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam roundCorner 4
+skinparam ArrowColor #333333
+skinparam ClassBackgroundColor #F2F2F2
+skinparam ClassBorderColor #262626
+skinparam stereotypeCBackgroundColor #FFFFFF
+hide circle
+
+abstract class Karakter <<abstract>> {
+  -nama : String
+  -hp : int
+  -hpMaks : int
+  -kekuatan : int
+  +Karakter(nama : String, hpMaks : int, kekuatan : int)
+  +getNama() : String
+  +getHp() : int
+  +getHpMaks() : int
+  +getKekuatan() : int
+  +masihHidup() : boolean
+  #pastikanHidup() : void
+  +terimaDamage(damage : int) : void
+  +pulihkanHp(jumlah : int) : int
+  +{abstract} serang(lawan : Karakter) : int
+}
+
+class Ksatria {
+  +Ksatria(nama : String)
+  +serang(lawan : Karakter) : int
+}
+
+class Penyihir {
+  -{static} JUMLAH_SEMBUH : int = 25
+  +Penyihir(nama : String)
+  +serang(lawan : Karakter) : int
+  +sembuhkan(target : Karakter) : int
+}
+
+class Monster {
+  -acak : Random
+  +Monster(nama : String)
+  +Monster(nama : String, acak : Random)
+  +serang(lawan : Karakter) : int
+}
+
+class BisaMenyembuhkan <<interface>> {
+  +sembuhkan(target : Karakter) : int
+}
+
+class KarakterMatiException {
+  +KarakterMatiException(pesan : String)
+}
+
+class Exception <<java.lang>>
+
+Karakter <|-- Ksatria
+Karakter <|-- Penyihir
+Karakter <|-- Monster
+BisaMenyembuhkan <|.. Penyihir
+Exception <|-- KarakterMatiException
+Karakter ..> KarakterMatiException : <<throws>>
+@enduml

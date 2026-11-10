@@ -1,0 +1,34 @@
+@startuml
+skinparam dpi 220
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+skinparam ArrowColor #333333
+skinparam ObjectBackgroundColor #F2F2F2
+skinparam ObjectBorderColor #262626
+skinparam ObjectFontStyle bold
+
+object "duel : Pertarungan" as duel {
+  giliran = 3
+  pemenang = null
+  riwayat = 5 entri
+}
+
+object "pahlawan : Ksatria" as pahlawan {
+  nama = "Arthur"
+  hp = 95
+  hpMaks = 120
+  kekuatan = 15
+}
+
+object "lawan : Monster" as lawan {
+  nama = "Raja Goblin"
+  hp = 100
+  hpMaks = 130
+  kekuatan = 16
+}
+
+duel o-- pahlawan : pahlawan
+duel o-- lawan : lawan
+@enduml

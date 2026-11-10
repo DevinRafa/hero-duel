@@ -1,0 +1,34 @@
+@startuml
+skinparam dpi 220
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam ActorBorderColor #262626
+skinparam ActorBackgroundColor #F2F2F2
+skinparam UsecaseBorderColor #262626
+skinparam UsecaseBackgroundColor #F2F2F2
+skinparam RectangleBorderColor #262626
+skinparam RectangleBackgroundColor #FFFFFF
+skinparam RectangleFontStyle bold
+left to right direction
+
+actor "Pemain" as Pemain
+
+rectangle "Sistem Duel Pahlawan" {
+  usecase "UC-01\nMemilih Pahlawan" as UC1
+  usecase "UC-02\nMemulai Pertarungan" as UC2
+  usecase "UC-03\nMenyerang Monster" as UC3
+  usecase "UC-04\nMenyembuhkan Pahlawan" as UC4
+  usecase "UC-05\nMelihat Log Pertarungan" as UC5
+  usecase "UC-06\nMengulang Pertarungan" as UC6
+}
+
+Pemain --> UC1
+Pemain --> UC2
+Pemain --> UC3
+Pemain --> UC4
+Pemain --> UC5
+Pemain --> UC6
+UC2 .> UC1 : <<include>>
+@enduml

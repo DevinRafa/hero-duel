@@ -22,3 +22,14 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Output kompilasi manual
+out/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+nbproject/private/
+.DS_Store

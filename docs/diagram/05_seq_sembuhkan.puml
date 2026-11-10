@@ -1,0 +1,63 @@
+@startuml
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam ArrowColor #333333
+skinparam SequenceLifeLineBorderColor #7F7F7F
+skinparam SequenceGroupBorderColor #7F7F7F
+skinparam ParticipantBorderColor #262626
+skinparam ParticipantBackgroundColor #F2F2F2
+skinparam ActorBorderColor #262626
+skinparam ActorBackgroundColor #F2F2F2
+skinparam NoteBackgroundColor #FFFFFF
+skinparam NoteBorderColor #7F7F7F
+skinparam SequenceMessageAlignment left
+skinparam sequenceArrowThickness 1
+autonumber "<b>0"
+
+actor "Pemain" as Pemain
+participant "jendela : JendelaUtama" as UI
+participant "duel : Pertarungan" as P
+participant "pahlawan : Penyihir" as H
+participant "lawan : Monster" as M
+
+Pemain -> UI : klik tombol "Sembuhkan"
+activate UI
+UI -> P : pahlawanMenyembuhkan()
+activate P
+P -> P : pastikanBerlangsung()
+
+alt pahlawanBisaMenyembuhkan() = true
+  P -> H : sembuhkan(pahlawan)
+  activate H
+  note right of H
+    Reference bertipe BisaMenyembuhkan
+    menunjuk object Penyihir.
+  end note
+  H -> H : pastikanHidup()
+  H -> H : pulihkanHp(25)
+  H --> P : jumlah pulih
+  deactivate H
+  P -> P : catat("... menyembuhkan diri ...")
+  P -> M : serang(pahlawan)
+  activate M
+  M -> H : terimaDamage(damage)
+  activate H
+  H --> M
+  deactivate H
+  M --> P : damage
+  deactivate M
+  P -> P : catat("... membalas ...")
+  P -> P : periksaPemenang()
+  P --> UI
+else pahlawanBisaMenyembuhkan() = false
+  P --> UI : IllegalStateException
+  note over UI : Tombol "Sembuhkan" dinonaktifkan\nuntuk pahlawan selain Penyihir
+end
+deactivate P
+
+UI -> UI : perbaruiTampilan()
+UI --> Pemain : HP dan log diperbarui
+deactivate UI
+@enduml
