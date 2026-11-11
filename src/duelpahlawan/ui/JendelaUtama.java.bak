@@ -1,0 +1,299 @@
+package duelpahlawan.ui;
+
+import duelpahlawan.model.Karakter;
+import duelpahlawan.model.KarakterMatiException;
+import duelpahlawan.model.Ksatria;
+import duelpahlawan.model.Monster;
+import duelpahlawan.model.Pertarungan;
+import duelpahlawan.model.Penyihir;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+/**
+ * Jendela utama aplikasi Duel Pahlawan.
+ * Konsep: JFrame Swing, association ke Pertarungan (model), pemisahan ui dan model.
+ * Alur: layar pilih pahlawan -> layar pertarungan -> layar hasil.
+ */
+public class JendelaUtama extends JFrame {
+
+    // ---- state ----
+    private Pertarungan pertarungan;
+
+    // ---- panel utama (CardLayout) ----
+    private final CardLayout kartu = new CardLayout();
+    private final JPanel panelKartu = new JPanel(kartu);
+
+    // ---- panel pilih pahlawan ----
+    private final JPanel panelPilih = new JPanel(new BorderLayout(10, 10));
+
+    // ---- panel pertarungan ----
+    private final JPanel panelLaga = new JPanel(new BorderLayout(10, 10));
+    private JLabel lblHpPahlawan, lblHpLawan, lblGiliran;
+    private JTextArea areaLog;
+    private JButton btnSerang, btnSembuhkan;
+
+    // ---- panel hasil ----
+    private final JPanel panelHasil = new JPanel(new BorderLayout(10, 10));
+    private JLabel lblPemenang;
+
+    // nama kartu
+    private static final String KARTU_PILIH = "PILIH";
+    private static final String KARTU_LAGA  = "LAGA";
+    private static final String KARTU_HASIL = "HASIL";
+
+    public JendelaUtama() {
+        super("Duel Pahlawan");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(520, 480);
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        bangunPanelPilih();
+        bangunPanelLaga();
+        bangunPanelHasil();
+
+        panelKartu.add(panelPilih, KARTU_PILIH);
+        panelKartu.add(panelLaga,  KARTU_LAGA);
+        panelKartu.add(panelHasil, KARTU_HASIL);
+
+        add(panelKartu);
+        kartu.show(panelKartu, KARTU_PILIH);
+    }
+
+    // ================================================================
+    // Panel 1: Pemilihan Pahlawan (Gambar 8)
+    // ================================================================
+    private void bangunPanelPilih() {
+        panelPilih.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        JLabel judul = new JLabel("Pilih Pahlawanmu", SwingConstants.CENTER);
+        judul.setFont(new Font("SansSerif", Font.BOLD, 22));
+        panelPilih.add(judul, BorderLayout.NORTH);
+
+        // kartu pilih karakter
+        JPanel tengah = new JPanel(new GridLayout(1, 2, 20, 0));
+
+        JPanel kartuKsatria = buatKartuKarakter(
+                "Ksatria",
+                "HP: 120 | Kekuatan: 15",
+                "Damage stabil setiap giliran.\nTidak bisa menyembuhkan.",
+                Color.decode("#1a3a5c")
+        );
+        JPanel kartuPenyihir = buatKartuKarakter(
+                "Penyihir",
+                "HP: 70 | Kekuatan: 12",
+                "Damage besar (x2).\nBisa menyembuhkan diri (+25 HP).",
+                Color.decode("#3a1a5c")
+        );
+
+        JButton btnPilihKsatria = new JButton("Pilih Ksatria");
+        JButton btnPilihPenyihir = new JButton("Pilih Penyihir");
+
+        styleButton(btnPilihKsatria, new Color(30, 100, 180));
+        styleButton(btnPilihPenyihir, new Color(100, 30, 180));
+
+        JPanel wrapKsatria = new JPanel(new BorderLayout(5, 5));
+        wrapKsatria.setOpaque(false);
+        wrapKsatria.add(kartuKsatria, BorderLayout.CENTER);
+        wrapKsatria.add(btnPilihKsatria, BorderLayout.SOUTH);
+
+        JPanel wrapPenyihir = new JPanel(new BorderLayout(5, 5));
+        wrapPenyihir.setOpaque(false);
+        wrapPenyihir.add(kartuPenyihir, BorderLayout.CENTER);
+        wrapPenyihir.add(btnPilihPenyihir, BorderLayout.SOUTH);
+
+        tengah.add(wrapKsatria);
+        tengah.add(wrapPenyihir);
+        panelPilih.add(tengah, BorderLayout.CENTER);
+
+        JLabel info = new JLabel("Lawanmu: Raja Goblin (HP 130)", SwingConstants.CENTER);
+        info.setFont(new Font("SansSerif", Font.ITALIC, 13));
+        info.setForeground(Color.GRAY);
+        panelPilih.add(info, BorderLayout.SOUTH);
+
+        btnPilihKsatria.addActionListener(e -> mulaiPermainan(new Ksatria("Arthur")));
+        btnPilihPenyihir.addActionListener(e -> mulaiPermainan(new Penyihir("Merlin")));
+    }
+
+    private JPanel buatKartuKarakter(String nama, String stats, String deskripsi, Color bg) {
+        JPanel p = new JPanel(new GridLayout(3, 1, 4, 4));
+        p.setBackground(bg);
+        p.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(bg.brighter(), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        JLabel lblNama = new JLabel(nama, SwingConstants.CENTER);
+        lblNama.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblNama.setForeground(Color.WHITE);
+
+        JLabel lblStats = new JLabel(stats, SwingConstants.CENTER);
+        lblStats.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        lblStats.setForeground(Color.LIGHT_GRAY);
+
+        JLabel lblDesk = new JLabel("<html><center>" + deskripsi.replace("\n", "<br>") + "</center></html>", SwingConstants.CENTER);
+        lblDesk.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        lblDesk.setForeground(Color.LIGHT_GRAY);
+
+        p.add(lblNama);
+        p.add(lblStats);
+        p.add(lblDesk);
+        return p;
+    }
+
+    // ================================================================
+    // Panel 2: Pertarungan Berlangsung (Gambar 9)
+    // ================================================================
+    private void bangunPanelLaga() {
+        panelLaga.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        // --- atas: info HP ---
+        JPanel atas = new JPanel(new GridLayout(1, 3, 10, 0));
+
+        lblHpPahlawan = new JLabel("", SwingConstants.LEFT);
+        lblHpPahlawan.setFont(new Font("SansSerif", Font.BOLD, 13));
+
+        lblGiliran = new JLabel("", SwingConstants.CENTER);
+        lblGiliran.setFont(new Font("SansSerif", Font.BOLD, 13));
+
+        lblHpLawan = new JLabel("", SwingConstants.RIGHT);
+        lblHpLawan.setFont(new Font("SansSerif", Font.BOLD, 13));
+
+        atas.add(lblHpPahlawan);
+        atas.add(lblGiliran);
+        atas.add(lblHpLawan);
+        panelLaga.add(atas, BorderLayout.NORTH);
+
+        // --- tengah: log pertarungan ---
+        areaLog = new JTextArea(12, 40);
+        areaLog.setEditable(false);
+        areaLog.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        areaLog.setLineWrap(true);
+        areaLog.setWrapStyleWord(true);
+        areaLog.setBackground(Color.decode("#1e1e1e"));
+        areaLog.setForeground(Color.decode("#d4d4d4"));
+        areaLog.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panelLaga.add(new JScrollPane(areaLog), BorderLayout.CENTER);
+
+        // --- bawah: tombol aksi ---
+        JPanel bawah = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
+        btnSerang = new JButton("Serang");
+        btnSembuhkan = new JButton("Sembuhkan");
+        styleButton(btnSerang, new Color(180, 60, 60));
+        styleButton(btnSembuhkan, new Color(60, 140, 60));
+        bawah.add(btnSerang);
+        bawah.add(btnSembuhkan);
+        panelLaga.add(bawah, BorderLayout.SOUTH);
+
+        btnSerang.addActionListener(e -> klikSerang());
+        btnSembuhkan.addActionListener(e -> klikSembuhkan());
+    }
+
+    // ================================================================
+    // Panel 3: Hasil Akhir (Gambar 10)
+    // ================================================================
+    private void bangunPanelHasil() {
+        panelHasil.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+
+        lblPemenang = new JLabel("", SwingConstants.CENTER);
+        lblPemenang.setFont(new Font("SansSerif", Font.BOLD, 24));
+
+        JLabel sub = new JLabel("Pertarungan selesai!", SwingConstants.CENTER);
+        sub.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        sub.setForeground(Color.GRAY);
+
+        JButton btnUlang = new JButton("Main Lagi");
+        styleButton(btnUlang, new Color(60, 130, 60));
+        btnUlang.addActionListener(e -> {
+            kartu.show(panelKartu, KARTU_PILIH);
+        });
+
+        JPanel tengah = new JPanel(new GridLayout(3, 1, 10, 20));
+        tengah.add(lblPemenang);
+        tengah.add(sub);
+
+        JPanel wrapBtn = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        wrapBtn.add(btnUlang);
+        tengah.add(wrapBtn);
+
+        panelHasil.add(tengah, BorderLayout.CENTER);
+    }
+
+    // ================================================================
+    // Logika aksi
+    // ================================================================
+    private void mulaiPermainan(Karakter pahlawan) {
+        pertarungan = new Pertarungan(pahlawan, new Monster("Raja Goblin"));
+        btnSembuhkan.setEnabled(pertarungan.pahlawanBisaMenyembuhkan());
+        perbaruiTampilan();
+        kartu.show(panelKartu, KARTU_LAGA);
+    }
+
+    private void klikSerang() {
+        try {
+            pertarungan.pahlawanMenyerang();
+        } catch (KarakterMatiException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Karakter Mati", JOptionPane.WARNING_MESSAGE);
+        } catch (IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+        perbaruiTampilan();
+    }
+
+    private void klikSembuhkan() {
+        try {
+            pertarungan.pahlawanMenyembuhkan();
+        } catch (KarakterMatiException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Karakter Mati", JOptionPane.WARNING_MESSAGE);
+        } catch (IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+        perbaruiTampilan();
+    }
+
+    private void perbaruiTampilan() {
+        Karakter p = pertarungan.getPahlawan();
+        Karakter l = pertarungan.getLawan();
+
+        lblHpPahlawan.setText(p.getNama() + "  HP: " + p.getHp() + "/" + p.getHpMaks());
+        lblHpLawan.setText(l.getNama() + "  HP: " + l.getHp() + "/" + l.getHpMaks());
+        lblGiliran.setText("Giliran " + pertarungan.getGiliran());
+
+        // tulis log
+        List<String> log = pertarungan.getRiwayat();
+        StringBuilder sb = new StringBuilder();
+        for (String baris : log) {
+            sb.append(baris).append("\n");
+        }
+        areaLog.setText(sb.toString());
+        areaLog.setCaretPosition(areaLog.getDocument().getLength());
+
+        // nonaktifkan tombol jika selesai
+        boolean selesai = pertarungan.isSelesai();
+        btnSerang.setEnabled(!selesai);
+        btnSembuhkan.setEnabled(!selesai && pertarungan.pahlawanBisaMenyembuhkan());
+
+        if (selesai) {
+            Karakter menang = pertarungan.getPemenang();
+            lblPemenang.setText(menang.getNama() + " menang!");
+            lblPemenang.setForeground(
+                    menang == p ? new Color(60, 180, 60) : new Color(220, 60, 60)
+            );
+            kartu.show(panelKartu, KARTU_HASIL);
+        }
+    }
+
+    // ================================================================
+    // Utilitas
+    // ================================================================
+    private void styleButton(JButton btn, Color bg) {
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+}
