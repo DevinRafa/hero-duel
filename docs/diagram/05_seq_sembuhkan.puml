@@ -6,6 +6,8 @@ skinparam defaultFontSize 11
 skinparam ArrowColor #333333
 skinparam SequenceLifeLineBorderColor #7F7F7F
 skinparam SequenceGroupBorderColor #7F7F7F
+skinparam SequenceBoxBorderColor #7F7F7F
+skinparam SequenceBoxBackgroundColor #FAFAFA
 skinparam ParticipantBorderColor #262626
 skinparam ParticipantBackgroundColor #F2F2F2
 skinparam ActorBorderColor #262626
@@ -17,17 +19,23 @@ skinparam sequenceArrowThickness 1
 autonumber "<b>0"
 
 actor "Pemain" as Pemain
-participant "jendela : JendelaUtama" as UI
-participant "duel : Pertarungan" as P
-participant "pahlawan : Penyihir" as H
-participant "lawan : Monster" as M
+box "duelpahlawan.ui"
+participant "jendela :\nJendelaUtama" as UI
+participant "panelPahlawan :\nPanelKarakter" as PP
+participant "panelLawan :\nPanelKarakter" as PL
+end box
+box "duelpahlawan.model"
+participant "duel :\nPertarungan" as P
+participant "pahlawan :\nPenyihir" as H
+participant "lawan :\nMonster" as M
+end box
 
 Pemain -> UI : klik tombol "Sembuhkan"
 activate UI
+UI -> UI : klikSembuhkan()
 UI -> P : pahlawanMenyembuhkan()
 activate P
 P -> P : pastikanBerlangsung()
-
 alt pahlawanBisaMenyembuhkan() = true
   P -> H : sembuhkan(pahlawan)
   activate H
@@ -43,9 +51,6 @@ alt pahlawanBisaMenyembuhkan() = true
   P -> M : serang(pahlawan)
   activate M
   M -> H : terimaDamage(damage)
-  activate H
-  H --> M
-  deactivate H
   M --> P : damage
   deactivate M
   P -> P : catat("... membalas ...")
@@ -53,11 +58,27 @@ alt pahlawanBisaMenyembuhkan() = true
   P --> UI
 else pahlawanBisaMenyembuhkan() = false
   P --> UI : IllegalStateException
-  note over UI : Tombol "Sembuhkan" dinonaktifkan\nuntuk pahlawan selain Penyihir
+  note over UI
+    Ditangkap try-catch -> tampilkanPesan(), lalu return (tanpa animasi).
+    Tombol "Sembuhkan" juga disembunyikan
+    untuk pahlawan selain Penyihir.
+  end note
 end
 deactivate P
 
-UI -> UI : perbaruiTampilan()
-UI --> Pemain : HP dan log diperbarui
+UI -> UI : putarGiliran(SEMBUH, hpAwal, awalLog)
+UI -> P : getRiwayat()
+P --> UI : riwayat
+UI -> UI : ambilAngka(riwayat)
+UI -> PP : mainkan(SEMBUH, callback)
+PP --> UI : callback selesai
+UI -> PP : setHp(), tampilkanAngka("+13")
+UI -> PL : mainkan(SERANG, callback)
+PL --> UI : callback selesai
+UI -> PP : setHp(), tampilkanAngka("-12")
+UI -> PP : mainkan(TERLUKA, callback)
+PP --> UI : callback selesai
+UI -> UI : akhiriGiliran()
+UI --> Pemain : HP, log, dan animasi diperbarui
 deactivate UI
 @enduml
