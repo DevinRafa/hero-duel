@@ -6,6 +6,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -65,7 +67,7 @@ public class AnimasiSprite {
     /** Membaca satu file strip, lalu memotongnya per frame. Null bila file tidak ada. */
     private BufferedImage[] muatStrip(String awalan, AksiSprite aksi) {
         String nama = "sprite/" + awalan + "_" + aksi.getAkhiranFile() + ".png";
-        try (InputStream in = AnimasiSprite.class.getResourceAsStream(nama)) {
+        try (InputStream in = bukaFile(nama)) {
             if (in == null) {
                 return null;                       // aksi ini tidak dimiliki karakter tersebut
             }
@@ -78,6 +80,22 @@ public class AnimasiSprite {
         } catch (IOException e) {
             throw new IllegalStateException("Gagal membaca " + nama, e);
         }
+    }
+
+    /**
+     * Membuka file sprite dari classpath. Bila tidak ditemukan (misalnya program
+     * dijalankan dari editor tanpa menyalin resource), dicoba dari folder src
+     * relatif terhadap folder proyek. Null bila file memang tidak ada.
+     */
+    private static InputStream bukaFile(String nama) throws IOException {
+        InputStream in = AnimasiSprite.class.getResourceAsStream(nama);
+        if (in == null) {
+            Path file = Path.of("src", "duelpahlawan", "ui", nama);
+            if (Files.exists(file)) {
+                in = Files.newInputStream(file);
+            }
+        }
+        return in;
     }
 
     public boolean punya(AksiSprite aksi)               { return frame.containsKey(aksi); }
