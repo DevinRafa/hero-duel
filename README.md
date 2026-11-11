@@ -49,13 +49,17 @@ docs/
 
 ## Getting started (JDK 17+)
 
-Run the game:
+Windows: double-click `jalankan.bat` (it compiles and starts the game). It needs a JDK on your PATH (`winget install EclipseAdoptium.Temurin.21.JDK`, then reopen the terminal).
+
+Run the game from a terminal (in the project folder):
 
 ```bash
-javac -d out $(find src -name "*.java")
-cp -r src/duelpahlawan/ui/sprite out/duelpahlawan/ui/   # sprites must sit next to the compiled classes
+javac -d out -sourcepath src src/duelpahlawan/ui/Main.java
+cp -r src/duelpahlawan/ui/sprite out/duelpahlawan/ui/   # sprites next to the compiled classes
 java -cp out duelpahlawan.ui.Main
 ```
+
+If the sprites are not on the classpath, the game falls back to `src/duelpahlawan/ui/sprite/` relative to the working directory, so running `Main` from an editor with the project folder as working directory also works.
 
 Run the model tests:
 
@@ -67,12 +71,12 @@ java -cp out UjiCoba
 Windows PowerShell:
 
 ```powershell
-javac -d out (Get-ChildItem -Recurse src -Filter *.java).FullName
+javac -d out -sourcepath src src/duelpahlawan/ui/Main.java
 Copy-Item -Recurse src/duelpahlawan/ui/sprite out/duelpahlawan/ui/
 java -cp out duelpahlawan.ui.Main
 ```
 
-IDEs (IntelliJ, Eclipse, NetBeans) copy resources under `src/` automatically; just run `duelpahlawan.ui.Main`.
+IDEs (IntelliJ, Eclipse, NetBeans) copy resources under `src/` automatically; just run `duelpahlawan.ui.Main`. In VS Code, install the "Extension Pack for Java", open the project folder, and run `Main.java`.
 
 ## Animation
 
