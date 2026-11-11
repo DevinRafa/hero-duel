@@ -38,31 +38,64 @@ Pertarungan  o--  2 x Karakter   (aggregation: hero + enemy)
 ```
 src/duelpahlawan/
   model/    game logic (Karakter, Ksatria, Penyihir, Monster, Pertarungan, ...)
-  ui/       Swing user interface (in progress)
+  ui/       Swing user interface: Main, JendelaUtama, PanelKarakter,
+            KartuKarakter, AnimasiSprite, AksiSprite, and sprite/ (pixel-art sprite sheets)
 uji/        console test runner for the model (UjiCoba.java)
 docs/
-  diagram/  PlantUML sources: use case, class, sequence, object diagrams
+  diagram/     PlantUML sources: use case, class, sequence, object diagrams
+  screenshot/  screenshots of the running game
   erd-duel-pahlawan.drawio   conceptual ER diagram (open in draw.io)
 ```
 
 ## Getting started (JDK 17+)
 
+Windows: double-click `jalankan.bat` (it compiles and starts the game). It needs a JDK on your PATH (`winget install EclipseAdoptium.Temurin.21.JDK`, then reopen the terminal).
+
+Run the game from a terminal (in the project folder):
+
 ```bash
-# compile the model and the test runner
-javac -d out $(find src -name "*.java") uji/UjiCoba.java
-# run the model tests
+javac -d out -sourcepath src src/duelpahlawan/ui/Main.java
+cp -r src/duelpahlawan/ui/sprite out/duelpahlawan/ui/   # sprites next to the compiled classes
+java -cp out duelpahlawan.ui.Main
+```
+
+If the sprites are not on the classpath, the game falls back to `src/duelpahlawan/ui/sprite/` relative to the working directory, so running `Main` from an editor with the project folder as working directory also works.
+
+Run the model tests:
+
+```bash
+javac -d out -cp out uji/UjiCoba.java
 java -cp out UjiCoba
 ```
 
 Windows PowerShell:
-`javac -d out (Get-ChildItem -Recurse src -Filter *.java).FullName uji/UjiCoba.java`
+
+```powershell
+javac -d out -sourcepath src src/duelpahlawan/ui/Main.java
+Copy-Item -Recurse src/duelpahlawan/ui/sprite out/duelpahlawan/ui/
+java -cp out duelpahlawan.ui.Main
+```
+
+IDEs (IntelliJ, Eclipse, NetBeans) copy resources under `src/` automatically; just run `duelpahlawan.ui.Main`. In VS Code, install the "Extension Pack for Java", open the project folder, and run `Main.java`.
+
+## Animation
+
+Each character has pixel-art sprite sheets (horizontal strips of frames): idle, attack, hurt, death, plus heal for the Mage and a victory hop. The GUI only plays them; all battle rules stay in `model`. The Knight and Monster step toward the opponent when attacking, while the Mage casts from a distance.
+
+## Screenshots
+
+| Choose a hero (name + character cards) | Battle | Result |
+|---|---|---|
+| ![Choose a hero](docs/screenshot/01-pilih-pahlawan.png) | ![Battle](docs/screenshot/02-pertarungan.png) | ![Result](docs/screenshot/03-hasil-akhir.png) |
 
 ## Roadmap
 
 - [x] Game model + tests
 - [x] UML diagrams and ER diagram
-- [ ] Swing GUI (`ui/JendelaUtama`, `Main`)
-- [ ] Screenshots
+- [x] Swing GUI with sprite animation (`ui/JendelaUtama`, `Main`)
+- [x] Screenshots
+- [ ] Sync class and sequence diagrams with the `ui` classes
+- [ ] Project report
 
 ## Contributing
 
