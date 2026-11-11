@@ -39,7 +39,7 @@ Pertarungan  o--  2 x Karakter   (aggregation: hero + enemy)
 src/duelpahlawan/
   model/    game logic (Karakter, Ksatria, Penyihir, Monster, Pertarungan, ...)
   ui/       Swing user interface: Main, JendelaUtama, PanelKarakter,
-            AnimasiSprite, AksiSprite, and sprite/ (pixel-art sprite sheets)
+            KartuKarakter, AnimasiSprite, AksiSprite, and sprite/ (pixel-art sprite sheets)
 uji/        console test runner for the model (UjiCoba.java)
 docs/
   diagram/     PlantUML sources: use case, class, sequence, object diagrams
@@ -84,7 +84,7 @@ Each character has pixel-art sprite sheets (horizontal strips of frames): idle, 
 
 ## Screenshots
 
-| Choose a hero | Battle | Result |
+| Choose a hero (name + character cards) | Battle | Result |
 |---|---|---|
 | ![Choose a hero](docs/screenshot/01-pilih-pahlawan.png) | ![Battle](docs/screenshot/02-pertarungan.png) | ![Result](docs/screenshot/03-hasil-akhir.png) |
 
