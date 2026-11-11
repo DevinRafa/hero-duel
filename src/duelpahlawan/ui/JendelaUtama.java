@@ -9,7 +9,6 @@ import duelpahlawan.model.Pertarungan;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -55,8 +54,6 @@ public class JendelaUtama extends JFrame {
 
     // komponen halaman pemilihan pahlawan
     private final JTextField fieldNama = new JTextField("Arthur", 14);
-    private final JComboBox<String> comboJenis = new JComboBox<>(new String[]{"Ksatria", "Penyihir"});
-    private final JButton tombolMulai = new JButton("Mulai Pertarungan");
 
     // komponen halaman pertarungan
     private final JPanel arena = new JPanel(new GridLayout(1, 2));
@@ -79,7 +76,6 @@ public class JendelaUtama extends JFrame {
         isi.add(buatHalamanDuel(), KARTU_DUEL);
         add(isi);
 
-        tombolMulai.addActionListener(e -> klikMulai());
         tombolSerang.addActionListener(e -> klikSerang());
         tombolSembuhkan.addActionListener(e -> klikSembuhkan());
         tombolUlangi.addActionListener(e -> klikUlangi());
@@ -92,7 +88,7 @@ public class JendelaUtama extends JFrame {
     // ------------------------------------------------------------ susunan tampilan
 
     private JPanel buatHalamanPilih() {
-        JPanel latar = new JPanel(new GridBagLayout()) {
+        JPanel latar = new JPanel(new BorderLayout(0, 14)) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -102,28 +98,44 @@ public class JendelaUtama extends JFrame {
             }
         };
         latar.setPreferredSize(new Dimension(1100, 670));
+        latar.setBorder(BorderFactory.createEmptyBorder(22, 60, 18, 60));
 
-        JPanel form = new JPanel(new GridLayout(0, 1, 0, 10));
-        form.setOpaque(false);
+        // bagian atas: judul, petunjuk, dan input nama
+        JPanel atas = new JPanel(new GridLayout(0, 1, 0, 6));
+        atas.setOpaque(false);
 
         JLabel judul = new JLabel("DUEL PAHLAWAN", SwingConstants.CENTER);
-        judul.setFont(new Font(Font.SERIF, Font.BOLD, 44));
+        judul.setFont(new Font(Font.SERIF, Font.BOLD, 40));
         judul.setForeground(Color.WHITE);
-        form.add(judul);
+        atas.add(judul);
 
-        JLabel petunjuk = new JLabel("Pilih pahlawanmu, lalu lawan Goblin sampai salah satu kalah.", SwingConstants.CENTER);
+        JLabel petunjuk = new JLabel("Beri nama pahlawanmu, pilih salah satu kartu, lalu lawan Goblin sampai salah satu kalah.",
+                SwingConstants.CENTER);
         petunjuk.setFont(petunjuk.getFont().deriveFont(15f));
         petunjuk.setForeground(new Color(0xC9CBE8));
-        form.add(petunjuk);
+        atas.add(petunjuk);
 
         fieldNama.setFont(fieldNama.getFont().deriveFont(16f));
-        comboJenis.setFont(comboJenis.getFont().deriveFont(16f));
-        form.add(barisForm("Nama pahlawan", fieldNama));
-        form.add(barisForm("Jenis pahlawan", comboJenis));
+        atas.add(barisForm("Nama pahlawan", fieldNama));
+        latar.add(atas, BorderLayout.NORTH);
 
-        tombolMulai.setFont(tombolMulai.getFont().deriveFont(Font.BOLD, 16f));
-        form.add(tombolMulai);
-        latar.add(form);
+        // tengah: kartu pilihan pahlawan (object contoh hanya untuk membaca statistik dan sprite)
+        JPanel daftarKartu = new JPanel(new GridLayout(1, 2, 40, 0));
+        daftarKartu.setOpaque(false);
+        daftarKartu.add(new KartuKarakter(new Ksatria("Contoh"),
+                "Damage stabil sebesar kekuatannya.<br>Tidak bisa menyembuhkan.",
+                new Color(0x1A3A5C), new Color(0x1E64B4), () -> klikMulai("Ksatria")));
+        daftarKartu.add(new KartuKarakter(new Penyihir("Contoh"),
+                "Damage besar (x2).<br>Bisa menyembuhkan diri (+25 HP).",
+                new Color(0x3A1A5C), new Color(0x6A1FB4), () -> klikMulai("Penyihir")));
+        latar.add(daftarKartu, BorderLayout.CENTER);
+
+        // bawah: keterangan lawan
+        Monster contohLawan = new Monster("Goblin");
+        JLabel infoLawan = new JLabel("Lawanmu: Goblin (HP " + contohLawan.getHpMaks() + ")", SwingConstants.CENTER);
+        infoLawan.setFont(infoLawan.getFont().deriveFont(Font.ITALIC, 14f));
+        infoLawan.setForeground(new Color(0xC9CBE8));
+        latar.add(infoLawan, BorderLayout.SOUTH);
         return latar;
     }
 
@@ -174,11 +186,11 @@ public class JendelaUtama extends JFrame {
 
     // ------------------------------------------------------------ aksi tombol
 
-    private void klikMulai() {
+    private void klikMulai(String jenis) {
         String nama = fieldNama.getText().trim();
         try {
             // polymorphism: reference Karakter menunjuk object Ksatria atau Penyihir
-            Karakter pahlawan = "Penyihir".equals(comboJenis.getSelectedItem())
+            Karakter pahlawan = "Penyihir".equals(jenis)
                     ? new Penyihir(nama)
                     : new Ksatria(nama);
             pertarungan = new Pertarungan(pahlawan, new Monster("Goblin"));
