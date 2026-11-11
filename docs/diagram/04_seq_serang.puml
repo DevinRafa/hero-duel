@@ -6,6 +6,8 @@ skinparam defaultFontSize 11
 skinparam ArrowColor #333333
 skinparam SequenceLifeLineBorderColor #7F7F7F
 skinparam SequenceGroupBorderColor #7F7F7F
+skinparam SequenceBoxBorderColor #7F7F7F
+skinparam SequenceBoxBackgroundColor #FAFAFA
 skinparam ParticipantBorderColor #262626
 skinparam ParticipantBackgroundColor #F2F2F2
 skinparam ActorBorderColor #262626
@@ -17,13 +19,20 @@ skinparam sequenceArrowThickness 1
 autonumber "<b>0"
 
 actor "Pemain" as Pemain
-participant "jendela : JendelaUtama" as UI
-participant "duel : Pertarungan" as P
-participant "pahlawan : Ksatria" as H
-participant "lawan : Monster" as M
+box "duelpahlawan.ui"
+participant "jendela :\nJendelaUtama" as UI
+participant "panelPahlawan :\nPanelKarakter" as PP
+participant "panelLawan :\nPanelKarakter" as PL
+end box
+box "duelpahlawan.model"
+participant "duel :\nPertarungan" as P
+participant "pahlawan :\nKsatria" as H
+participant "lawan :\nMonster" as M
+end box
 
 Pemain -> UI : klik tombol "Serang"
 activate UI
+UI -> UI : klikSerang()
 UI -> P : pahlawanMenyerang()
 activate P
 P -> P : pastikanBerlangsung()
@@ -31,39 +40,60 @@ P -> H : serang(lawan)
 activate H
 H -> H : pastikanHidup()
 H -> M : terimaDamage(15)
-activate M
-M --> H
-deactivate M
 H --> P : damage = 15
 deactivate H
 note right of H
   Reference bertipe Karakter,
   object bertipe Ksatria:
-  yang dijalankan serang() milik Ksatria
+  serang() milik Ksatria yang jalan
   (dynamic method dispatch).
 end note
 P -> P : catat("... menyerang ...")
-
 alt lawan.masihHidup() = true
   P -> M : serang(pahlawan)
   activate M
   M -> H : terimaDamage(damage)
-  activate H
-  H --> M
-  deactivate H
   M --> P : damage
   deactivate M
   P -> P : catat("... membalas ...")
 else lawan.masihHidup() = false
   note over P : Monster kalah, tidak membalas
 end
-
 P -> P : periksaPemenang()
 P --> UI
 deactivate P
-UI -> P : getRiwayat(), getPahlawan(), getLawan()
-P --> UI
-UI -> UI : perbaruiTampilan()
-UI --> Pemain : HP dan log diperbarui
+note over UI
+  try-catch: KarakterMatiException dan
+  IllegalStateException -> tampilkanPesan()
+end note
+
+UI -> UI : putarGiliran(SERANG, hpAwal, awalLog)
+UI -> P : getRiwayat()
+P --> UI : riwayat
+UI -> UI : ambilAngka(riwayat)
+UI -> PP : mainkan(SERANG, callback)
+note right of PP
+  Timer memutar frame sprite.
+  Setelah frame terakhir,
+  callback dijalankan.
+end note
+PP --> UI : callback selesai
+UI -> PL : setHp(), tampilkanAngka("-15")
+UI -> PL : mainkan(TERLUKA atau MATI, callback)
+PL --> UI : callback selesai
+opt monster masih hidup
+  UI -> PL : mainkan(SERANG, callback)
+  PL --> UI : callback selesai
+  UI -> PP : setHp(), tampilkanAngka("-12")
+  UI -> PP : mainkan(TERLUKA, callback)
+  PP --> UI : callback selesai
+end
+UI -> UI : akhiriGiliran()
+note right of UI
+  Memperbarui log dan status, lalu aturTombol().
+  Jika isSelesai(): panel pemenang
+  memainkan MENANG.
+end note
+UI --> Pemain : HP, log, dan animasi diperbarui
 deactivate UI
 @enduml

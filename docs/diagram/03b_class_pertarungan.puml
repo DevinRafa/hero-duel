@@ -11,15 +11,67 @@ skinparam ClassBorderColor #262626
 skinparam stereotypeCBackgroundColor #FFFFFF
 hide circle
 hide empty members
-left to right direction
+skinparam nodesep 25
+skinparam ranksep 35
 
 class JFrame <<javax.swing>>
+class JPanel <<javax.swing>>
+
+class Main <<duelpahlawan.ui>> {
+  +{static} main(args : String[]) : void
+}
 
 class JendelaUtama <<duelpahlawan.ui>> {
   -pertarungan : Pertarungan
+  -panelPahlawan : PanelKarakter
+  -panelLawan : PanelKarakter
+  -sibuk : boolean
+  -klikMulai(jenis : String) : void
   -klikSerang() : void
   -klikSembuhkan() : void
-  -perbaruiTampilan() : void
+  -klikUlangi() : void
+  -putarGiliran(aksiPahlawan : AksiSprite,\n    hpAwal : int[], awalLog : int) : void
+  -terkena(panel : PanelKarakter, hpBaru : int,\n    damage : int, lanjut : Runnable) : void
+  -akhiriGiliran() : void
+  -aturTombol() : void
+}
+
+class PanelKarakter <<duelpahlawan.ui>> {
+  -sprite : AnimasiSprite
+  -aksi : AksiSprite
+  -indeksFrame : int
+  +PanelKarakter(karakter : Karakter, hadapKanan : boolean)
+  +setHp(hp : int, hpMaks : int) : void
+  +mainkan(aksiBaru : AksiSprite,\n    setelahSelesai : Runnable) : void
+  +tampilkanAngka(teks : String, warna : Color) : void
+  +hentikan() : void
+}
+
+class KartuKarakter <<duelpahlawan.ui>> {
+  -sprite : AnimasiSprite
+  -indeksFrame : int
+  +KartuKarakter(contoh : Karakter, deskripsi : String,\n    warnaLatar : Color, warnaTombol : Color,\n    saatDipilih : Runnable)
+}
+
+class AnimasiSprite <<duelpahlawan.ui>> {
+  -frame : Map<AksiSprite, BufferedImage[]>
+  -lebarFrame : int
+  -menghadapKanan : boolean
+  +{static} untuk(karakter : Karakter) : AnimasiSprite
+  +punya(aksi : AksiSprite) : boolean
+  +jumlahFrame(aksi : AksiSprite) : int
+  +getFrame(aksi : AksiSprite, indeks : int)\n    : BufferedImage
+  +getLebarFrame() : int
+  +isMenghadapKanan() : boolean
+}
+
+enum AksiSprite <<duelpahlawan.ui>> {
+  IDLE
+  SERANG
+  TERLUKA
+  MATI
+  SEMBUH
+  MENANG
 }
 
 class Pertarungan <<duelpahlawan.model>> {
@@ -47,6 +99,16 @@ class Pertarungan <<duelpahlawan.model>> {
 abstract class Karakter <<abstract>>
 
 JFrame <|-- JendelaUtama
+JPanel <|-- PanelKarakter
+JPanel <|-- KartuKarakter
+Main ..> JendelaUtama : membuka >
 JendelaUtama --> "1" Pertarungan : mengelola >
+JendelaUtama *-- "2" PanelKarakter : menampilkan >
+JendelaUtama ..> KartuKarakter : membuat 2 kartu >
+PanelKarakter *-- "1" AnimasiSprite
+KartuKarakter *-- "1" AnimasiSprite
+AnimasiSprite ..> AksiSprite
+PanelKarakter ..> AksiSprite
+AnimasiSprite ..> Karakter : memilih sprite >
 Pertarungan "1" o-- "2" Karakter : melibatkan >
 @enduml

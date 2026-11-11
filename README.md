@@ -94,7 +94,7 @@ Each character has pixel-art sprite sheets (horizontal strips of frames): idle, 
 - [x] UML diagrams and ER diagram
 - [x] Swing GUI with sprite animation (`ui/JendelaUtama`, `Main`)
 - [x] Screenshots
-- [ ] Sync class and sequence diagrams with the `ui` classes
+- [x] Sync class and sequence diagrams with the `ui` classes
 - [ ] Project report
 
 ## Contributing
