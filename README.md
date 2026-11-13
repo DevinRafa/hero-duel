@@ -1,4 +1,5 @@
-# Hero Duel
+# Hero Duell
+
 
 A turn-based hero battle game written in **Java** with a **Swing** GUI.
 _(Indonesian title: **Duel Pahlawan**.)_
